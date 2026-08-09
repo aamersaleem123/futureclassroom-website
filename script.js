@@ -9,17 +9,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Contact form (front-end only — swap the alert for a real endpoint later)
+  // Contact form — submits to Formspree so messages actually reach your inbox
   const form = document.getElementById('contact-form');
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = form.querySelector('button[type="submit"]');
       const original = btn.textContent;
-      btn.textContent = 'Message sent ✓';
+      btn.textContent = 'Sending...';
       btn.disabled = true;
-      form.reset();
-      setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2600);
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          btn.textContent = 'Message sent ✓';
+          form.reset();
+        } else {
+          btn.textContent = 'Something went wrong — try again';
+        }
+      } catch (err) {
+        btn.textContent = 'Something went wrong — try again';
+      }
+
+      setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 3200);
     });
   }
 });
